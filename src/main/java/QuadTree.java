@@ -93,6 +93,7 @@ class QuadTree {
 			break;
 			
 		case "dump":
+			printQuadTree();
 			break;
 			
 		default:
