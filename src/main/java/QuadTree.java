@@ -26,6 +26,8 @@ class QuadTree {
                     Rectangle rect = new Rectangle(x, y, width, height);
                     root.insert(rect);
                     System.out.println("Inserted: " + rect);
+                    // Dump the tree structure after insertion
+                    printQuadTree();
                     break;
 
                 case "find":
@@ -38,6 +40,8 @@ class QuadTree {
                     } else {
                         System.out.printf("Nothing is at (%d, %d).%n", x, y);
                     }
+                    // Dump the tree structure after find operation
+                    printQuadTree();
                     break;
 
                 case "delete":
@@ -50,6 +54,8 @@ class QuadTree {
                     } else {
                         System.out.printf("Nothing to delete at (%d, %d).%n", x, y);
                     }
+                    // Dump the tree structure after deletion
+                    printQuadTree();
                     break;
 
                 case "update":
@@ -66,6 +72,8 @@ class QuadTree {
                     } else {
                         System.out.printf("Nothing to update at (%d, %d).%n", x, y);
                     }
+                    // Dump the tree structure after update
+                    printQuadTree();
                     break;
 
                 case "dump":
@@ -82,8 +90,9 @@ class QuadTree {
         }
     }
 
-    // Print entire QuadTree structure
+    // Print entire QuadTree structure to validate the tree after each command
     public void printQuadTree() {
+        System.out.println("QuadTree Structure:");
         printNode(root, 0);
     }
 
