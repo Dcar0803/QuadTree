@@ -1,95 +1,53 @@
 import java.util.ArrayList;
 import java.util.List;
 
-class LeafNode extends Node{
-	//List that stores the rectangles contained in the leaf node
-	private List<Rectangle> rectangles;
-	
-	public LeafNode(int x, int y, int width, int height) {
-		super(x, y, width, height); //Call the parent constructor
-		
-		this.rectangles = new ArrayList<>();
-	}//end of LeafNode constructor
-	
-	
-	@Override
-	public void insert(Rectangle rect) {
-		
-		//Checks if there is already a rectangle at the specified position
-		for(Rectangle r: rectangles){
-			
-			//Checks whether the (x,y) of  the new rectangle is equal to a rectangle (x,y)
-			if (r.x == rect.x && r.y == rect.y){ 
-				
-				System.out.println("You can not double insert at a position");
-				System.exit(0); //Terminates the program
-				
-			}//end of if statement
-			
-		}//end of for loop
-		
-		//Checks if there 5 or less rectangles in the leaf node
-		
-		if (rectangles.size() < 5) {
-			rectangles.add(rect);	
-		}else {
-			split();
-			insert(rect);
-			
-			
-		}//end of if else statement
-		
-	}//end of insert method 
-	
-	@Override
-	public Rectangle find(int x, int y) {
-		//Finds the rectangle at the specified X and Y positions
-		
-		for (Rectangle rect : rectangles) {
-			if(rect.x == x && rect.y == y) {
-				return rect;
-				
-			}//end of if statement 
-			
-		}//end of for loop
-		
-		return null; //The function will return no rectangle if the specific (x, y) are not found 
-		
-	}//end of find method
-	
-	@Override
-	public boolean delete(int x, int y) {
-		
-		for (Rectangle rect: rectangles) {
-			if (rect.x == x && rect.y == y) {
-				rectangles.remove(rect);
-				return true;
-			}//end of if statement 
-			
-		}//end of for loop 
-		
-		return false;
-		
-	}//end of the delete method 
-	
-	public void split() {
-		
-		InternalNode internalNode = new InternalNode(x,y,width,height);
-		
-		for (Rectangle rect: rectangles) {
-			internalNode.insert(rect); 
-		}//end of for loop
-		
-		//Converting leaf nodes into internal nodes
-		this.children = internalNode.children;
-		
-		
-	}//end of split method
-	
-	public List<Rectangle> getRectangles(){
-		return rectangles;
-	}//end of getRectangle method
-	
-	
-}//end of LeafNode class
+class LeafNode extends Node {
+    private List<Rectangle> rectangles;
+    private static final int MAX_RECTANGLES = 4;
 
+    public LeafNode(int x, int y, int width, int height) {
+        super(x, y, width, height);
+        rectangles = new ArrayList<>();
+    }
+
+    @Override
+    public Node insert(Rectangle rect) {
+        if (rectangles.size() < MAX_RECTANGLES) {
+            rectangles.add(rect);
+            return this;
+        } else {
+            return split().insert(rect);
+        }
+    }
+
+    private InternalNode split() {
+        InternalNode internalNode = new InternalNode(x, y, width, height);
+        for (Rectangle rect : rectangles) {
+            internalNode.insert(rect);
+        }
+        rectangles.clear();
+        return internalNode;
+    }
+
+    @Override
+    public Rectangle find(int x, int y) {
+        for (Rectangle rect : rectangles) {
+            if (rect.x == x && rect.y == y) return rect;
+        }
+        return null;
+    }
+
+    @Override
+    public boolean delete(int x, int y) {
+        return rectangles.removeIf(rect -> rect.x == x && rect.y == y);
+    }
+
+    public List<Rectangle> getRectangles() {
+        return rectangles;
+    }
+
+    @Override
+    public String toString() {
+        return "LeafNode at (" + x + ", " + y + ") with " + rectangles.size() + " rectangles";
+    }
+}

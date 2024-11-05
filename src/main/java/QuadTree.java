@@ -7,7 +7,7 @@ class QuadTree {
 
     public QuadTree() {
         // Initialize the quad tree with a LeafNode that stores an initial space of 100x100
-        root = new LeafNode(-50, 50, 100, 100);
+        root = new LeafNode(-50, -50, 100, 100);
     }
 
     // Process each command from the input file
@@ -24,10 +24,8 @@ class QuadTree {
                     int height = Integer.parseInt(parts[4]);
 
                     Rectangle rect = new Rectangle(x, y, width, height);
-                    root.insert(rect);
+                    root = root.insert(rect);  // update root if root splits
                     System.out.println("Inserted: " + rect);
-                    // Dump the tree structure after insertion
-                    printQuadTree();
                     break;
 
                 case "find":
@@ -40,8 +38,6 @@ class QuadTree {
                     } else {
                         System.out.printf("Nothing is at (%d, %d).%n", x, y);
                     }
-                    // Dump the tree structure after find operation
-                    printQuadTree();
                     break;
 
                 case "delete":
@@ -54,8 +50,6 @@ class QuadTree {
                     } else {
                         System.out.printf("Nothing to delete at (%d, %d).%n", x, y);
                     }
-                    // Dump the tree structure after deletion
-                    printQuadTree();
                     break;
 
                 case "update":
@@ -72,8 +66,6 @@ class QuadTree {
                     } else {
                         System.out.printf("Nothing to update at (%d, %d).%n", x, y);
                     }
-                    // Dump the tree structure after update
-                    printQuadTree();
                     break;
 
                 case "dump":
@@ -83,10 +75,8 @@ class QuadTree {
                 default:
                     System.out.println("Unknown command: " + action);
             }
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid command format for: " + command);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println("Missing arguments in command: " + command);
+        } catch (Exception e) {
+            System.err.println("Error processing command: " + e.getMessage());
         }
     }
 
@@ -102,10 +92,10 @@ class QuadTree {
 
         if (node instanceof InternalNode) {
             InternalNode internalNode = (InternalNode) node;
-            if (internalNode.northwest != null) printNode(internalNode.northwest, level + 1);
-            if (internalNode.northeast != null) printNode(internalNode.northeast, level + 1);
-            if (internalNode.southwest != null) printNode(internalNode.southwest, level + 1);
-            if (internalNode.southeast != null) printNode(internalNode.southeast, level + 1);
+            printNode(internalNode.northwest, level + 1);
+            printNode(internalNode.northeast, level + 1);
+            printNode(internalNode.southwest, level + 1);
+            printNode(internalNode.southeast, level + 1);
         } else if (node instanceof LeafNode) {
             LeafNode leafNode = (LeafNode) node;
             for (Rectangle rect : leafNode.getRectangles()) {
@@ -114,7 +104,6 @@ class QuadTree {
         }
     }
 
-    // Read and process commands from a .cmmd file
     public void readAndProcessFile(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -137,11 +126,7 @@ class QuadTree {
             return;
         }
 
-        // Initialize the QuadTree
         QuadTree quadTree = new QuadTree();
-
-        // Read the .cmmd file and process commands
-        String filePath = args[0];
-        quadTree.readAndProcessFile(filePath);
+        quadTree.readAndProcessFile(args[0]);
     }
 }

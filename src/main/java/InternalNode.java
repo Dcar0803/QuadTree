@@ -1,41 +1,30 @@
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 class InternalNode extends Node {
-    Node northeast;
-    Node southeast;
-    Node southwest;
-    Node northwest;
+    Node northeast, southeast, southwest, northwest;
 
-    // Default Constructor
     public InternalNode(int x, int y, int width, int height) {
         super(x, y, width, height);
-
         int halfWidth = width / 2;
         int halfHeight = height / 2;
 
-        // Creating the child nodes representing the four quadrants
-        northwest = new LeafNode(x, y, halfWidth, halfHeight); // Top-left region
-        northeast = new LeafNode(x + halfWidth, y, halfWidth, halfHeight); // Top-right region
-        southwest = new LeafNode(x, y + halfHeight, halfWidth, halfHeight); // Bottom-left region
-        southeast = new LeafNode(x + halfWidth, y + halfHeight, halfWidth, halfHeight); // Bottom-right region
+        northwest = new LeafNode(x, y, halfWidth, halfHeight);
+        northeast = new LeafNode(x + halfWidth, y, halfWidth, halfHeight);
+        southwest = new LeafNode(x, y + halfHeight, halfWidth, halfHeight);
+        southeast = new LeafNode(x + halfWidth, y + halfHeight, halfWidth, halfHeight);
     }
 
     @Override
-    public void insert(Rectangle rect) {
+    public Node insert(Rectangle rect) {
         if (rect.x < x + width / 2) {
-            if (rect.y < y + height / 2) {
-                southwest.insert(rect);
-            } else {
-                northwest.insert(rect);
-            }
+            if (rect.y < y + height / 2) southwest = southwest.insert(rect);
+            else northwest = northwest.insert(rect);
         } else {
-            if (rect.y < y + height / 2) {
-                southeast.insert(rect);
-            } else {
-                northeast.insert(rect);
-            }
+            if (rect.y < y + height / 2) southeast = southeast.insert(rect);
+            else northeast = northeast.insert(rect);
         }
+        return this;
     }
 
     @Override
@@ -50,49 +39,11 @@ class InternalNode extends Node {
     @Override
     public boolean delete(int x, int y) {
         boolean deleted = false;
-
         if (x < this.x + width / 2) {
             deleted = (y < this.y + height / 2) ? southwest.delete(x, y) : northwest.delete(x, y);
         } else {
             deleted = (y < this.y + height / 2) ? southeast.delete(x, y) : northeast.delete(x, y);
         }
-
-        if (deleted && shouldMerge()) {
-            mergeToLeaf();
-        }
         return deleted;
-    }
-
-    // Check if the node should merge back into a LeafNode
-    private boolean shouldMerge() {
-        int totalRectangles = getRectanglesFromNode(northwest).size()
-                            + getRectanglesFromNode(northeast).size()
-                            + getRectanglesFromNode(southwest).size()
-                            + getRectanglesFromNode(southeast).size();
-
-        return totalRectangles <= 4;
-    }
-
-    private void mergeToLeaf() {
-        List<Rectangle> allRectangles = new ArrayList<>();
-        allRectangles.addAll(getRectanglesFromNode(northwest));
-        allRectangles.addAll(getRectanglesFromNode(northeast));
-        allRectangles.addAll(getRectanglesFromNode(southwest));
-        allRectangles.addAll(getRectanglesFromNode(southeast));
-
-        northwest = null;
-        northeast = null;
-        southwest = null;
-        southeast = null;
-
-        LeafNode leaf = new LeafNode(x, y, width, height);
-        allRectangles.forEach(leaf::insert);
-    }
-
-    private List<Rectangle> getRectanglesFromNode(Node node) {
-        if (node instanceof LeafNode) {
-            return ((LeafNode) node).getRectangles();
-        }
-        return new ArrayList<>();
     }
 }
